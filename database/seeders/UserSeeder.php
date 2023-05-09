@@ -21,6 +21,7 @@ class UserSeeder extends Seeder
                 'age' => '37',
                 'sex' => 'M',
                 'email' => 'rsayu@nauta.cu',
+                'nacionalidad' => 'CUBA',
                 'password' => Hash::make('password')    
             ],
         ]);
