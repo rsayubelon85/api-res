@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 class PassportAuthController extends Controller
@@ -13,6 +14,8 @@ class PassportAuthController extends Controller
             'password' => $request->password
         ];
 
+        //dd($credentials);
+
         if (auth()->attempt($credentials)) {
             $token = auth()->user()->createToken('Token')->accessToken;
 
@@ -22,7 +25,7 @@ class PassportAuthController extends Controller
             return response()->json(['error' => 'Credenciales erroneas']);
         }
 
-        
+
     }
 
     public function logout (Request $request){
@@ -32,6 +35,6 @@ class PassportAuthController extends Controller
         $token->revoke();
 
         return response()->json(['success' => 'Logout successfully']);
-        
+
     }
 }

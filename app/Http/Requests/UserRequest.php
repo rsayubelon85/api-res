@@ -22,28 +22,27 @@ class UserRequest extends FormRequest
      */
     public function rules(): array
     {
-        return match($this->method()){
-            'POST' => [
-                'name' => 'required|string|max:50|regex:([a-zA-ZñÑáéíóúÁÉÍÓÚ\s]+)',
-                'last_name' => 'required|string|max:50|regex:([a-zA-ZñÑáéíóúÁÉÍÓÚ\s]+)',
-                'sex' => 'required|string|max:1|regex:([M or F or I]+)',
-                'email' => 'required|string|email|max:255|unique:users,email',
-                'age' => 'required|numeric|max:120',
-                'password' => ['required',Password::defaults()->min(8)->letters()->mixedCase()->numbers()->symbols()->uncompromised()],
-                'password_confirmation' => 'required|same:password'               
-            ]
-        };
-        
-        
-        
-        /*[
-            'name' => 'required|string|max:50|regex:([a-zA-ZñÑáéíóúÁÉÍÓÚ\s]+)',
-            'last_name' => 'required|string|max:50|regex:([a-zA-ZñÑáéíóúÁÉÍÓÚ\s]+)',
-            'sex' => 'required|string|max:1|regex:([a-zA-ZñÑáéíóúÁÉÍÓÚ\s]+)',
-            'email' => 'required|string|email|max:255|unique:users,email',
-            'age' => 'required|numeric|max:120',
-            'password' => ['required',Password::defaults()->min(8)->letters()->mixedCase()->numbers()->symbols()->uncompromised()],
-            'password_confirmation' => 'required|same:password'
-        ];*/
+        $rules['name'] = 'required|string|max:50|regex:/^[\pL\s\-]+$/u';
+        $rules['last_name'] = 'required|string|max:50|regex:([a-zA-ZñÑáéíóúÁÉÍÓÚ\s]+)';
+        $rules['sex'] = 'required|string|max:1|regex:([a-zA-ZñÑáéíóúÁÉÍÓÚ\s]+)';
+        $rules['age'] = 'required|numeric|max:120';
+
+        if ($this->isMethod('POST')) {
+            $rules['email'] = 'required|string|email|max:255|unique:users,email';
+            $rules['username'] = 'required|string|regex:/^[\pL\s\-]+$/u|unique:users,username';
+            $rules['password'] = ['required', Password::defaults()->min(8)->letters()->mixedCase()->numbers()->symbols()->uncompromised()];
+            $rules['password_confirmation'] = 'required|same:password';
+            $rules['telephone'] = 'required|numeric|min:50000000|max:59999999|unique:users,telephone';
+        }
+
+        if ($this->isMethod('PUT')) {
+            $rules['telephone'] = 'required|numeric|min:50000000|max:59999999|unique:users,telephone,' . app('request')->segment(2);
+            if ($this->request->get('password') != null) {
+                $rules['password'] = ['required', Password::defaults()->min(8)->letters()->mixedCase()->numbers()->symbols()->uncompromised()];
+                $rules['password_confirmation'] = 'required|same:password';
+            }
+        }
+
+        return $rules;
     }
 }

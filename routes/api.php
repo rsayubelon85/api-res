@@ -1,9 +1,10 @@
 <?php
 
+use App\Http\Controllers\Auth\PassportAuthController;
+use App\Http\Controllers\Auth\RoleController;
+use App\Http\Controllers\Auth\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\PassportAuthController;
-use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,7 +29,9 @@ Route::controller(UserController::class)/*->middleware('auth:api')*/->group(func
     Route::delete('users/{user}','destroy');
 });
 
-Route::controller(PassportAuthController::class)->group(function(){    
+Route::resource('roles',RoleController::class)->except('show')->middleware('auth:api');
+
+Route::controller(PassportAuthController::class)->group(function(){
     Route::post('login','login');
     Route::post('logout','logout')->middleware('auth:api');
 });

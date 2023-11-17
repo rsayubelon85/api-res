@@ -15,14 +15,17 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('last_name');
-            $table->integer('age');
+            $table->string('age');
             $table->string('sex');
+            $table->string('username')->unique();
             $table->string('email')->unique();
-            $table->string('nacionalidad')->nullable();
+            $table->unsignedBigInteger('countrie_id');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
+
+            $table->foreign('countrie_id')->references('id')->on('countries');
         });
     }
 

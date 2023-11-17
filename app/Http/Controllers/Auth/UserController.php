@@ -1,47 +1,75 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Auth;
 
-use Illuminate\Http\Request;
-use App\Models\User;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\UserRequest;
-use App\Models\Paise;
+use App\Models\User;
+use App\Repositories\PaiseRepository;
+use App\Repositories\UserRepository;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
 
 class UserController extends Controller
 {
+    private $userRepository;
+    private $paiseRepository;
+    //private $rolRepository;
+    //private $historyRepository;
+
+    public function __construct(UserRepository $userRepository,PaiseRepository $paiseRepository/*, RolRepository $rolRepository, PasswordHistorieRepository $historyRepository*/)
+    {
+        //$this->middleware('auth');
+        $this->userRepository = $userRepository;
+        $this->paiseRepository = $paiseRepository;
+        /*$this->rolRepository = $rolRepository;
+        $this->historyRepository = $historyRepository;*/
+    }
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $users = User::all();
+        $users = $this->userRepository->all();
         return response()->json($users);
     }
 
     public function store(UserRequest $request){
 
-        $nacionalidad = null;
-        if($request->nacionalidad != null){
-            $nacionalidad = Paise::where('code',$request->nacionalidad)->first();
-            if($nacionalidad != null){
-                $nacionalidad = $nacionalidad->name;
+        $nationality = null;
+        if($request->$nationality != null){
+            $paise = $this->paiseRepository->getByColumn(['code']);//Paise::where('code',$request->$nationality)->first();
+            if($paise != null){
+                $nationality = $paise->name;
             }
         }
-
         $user = User::create([
             'name' => $request->name,
             'last_name' => $request->last_name,
+            'username' => $request->username,
             'age' => $request->age,
             'sex' => $request->sex,
             'email' => $request->email,
-            'nacionalidad' => $nacionalidad,
+            'nationality' => $nationality,
             'password' => Hash::make($request->password),
         ]);
 
         $token = $user->createToken('Token')->accessToken;
+
+        /*$idRol = $request['roles'][0];
+        $rol = $this->rolRepository->getById($idRol);
+        $user->assignRole($rol);
+
+        $this->historyRepository->create([
+            'user_id' => $user->id,
+            'password' => $password,
+        ]);*/
+
+        /*$message = $this->Mensaje('success', 'Información!', 'El usuario ha sido registrado correctamente.', true);
+        $this->Insertar_Traza('rol.admin', json_encode($user), 'null', 'null', 'null', 'Se creo el usuario.');*/
+
 
         return response()->json(['token' => $token,'status' => 'success'],200);
 
@@ -53,6 +81,7 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
+
         if($request->password == null){
             $request->validate([
                 'name' => 'required|string|max:50|regex:([a-zA-ZñÑáéíóúÁÉÍÓÚ\s]+)',
@@ -67,6 +96,7 @@ class UserController extends Controller
             $user->age = $request->age;
         }
         else {
+
             $request->validate([
                 'password' => ['required',Password::defaults()->min(8)->letters()->mixedCase()->numbers()->symbols()->uncompromised()],
                 'password_confirmation' => 'required|same:password'
@@ -74,10 +104,11 @@ class UserController extends Controller
 
             $user->password = Hash::make($request->password);
         }
-        $user->touch();
-        
-        $token = $user->createToken('Token')->accessToken;
 
+        $user->touch();
+
+        $token = $user->createToken('Token')->accessToken;
+        dd('guardar');
         return response()->json(['token' => $token,'status' => 'success'],200);
     }
 
