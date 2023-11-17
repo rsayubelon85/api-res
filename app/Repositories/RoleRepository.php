@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use Illuminate\Support\Facades\DB;
@@ -11,82 +13,82 @@ use Spatie\Permission\Models\Role;
 /**
  * Class RoleRepository.
  */
-class RoleRepository extends BaseRepository
+final class RoleRepository extends BaseRepository
 {
-    protected $model;
+	protected $model;
 
-    public function __construct(Role $model = null)
-    {
-        $this->model = $model == null ? new Role() : $model;
-    }
+	public function __construct(Role $model = null)
+	{
+		$this->model = $model === null ? new Role() : $model;
+	}
 
-    public function getRolTable()
-    {
-        return datatables()->eloquent(Role::query())
-            ->addColumn('action', 'actions')
-            ->toJson();
-    }
+	public function getRolTable()
+	{
+		return datatables()->eloquent(Role::query())
+			->addColumn('action', 'actions')
+			->toJson();
+	}
 
-    public function getPermissions($id)
-    {
-        return $this->model->find($id)->permissions();
-    }
+	public function getPermissions($id)
+	{
+		return $this->model->find($id)->permissions();
+	}
 
-    public function getRoleDiferentId($id)
-    {
-        return $this->model::query('id', '<>', $id)->get();
-    }
+	public function getRoleDiferentId($id)
+	{
+		return $this->model::query('id', '<>', $id)->get();
+	}
 
-    public function create(array $data)
-    {
-        return DB::transaction(function () use ($data) {
-            return $this->model->create($data);
-        });
-    }
+	public function create(array $data)
+	{
+		return DB::transaction(function () use ($data) {
+			return $this->model->create($data);
+		});
+	}
 
-    public function update(Role $role)
-    {
-        return DB::transaction(function () use ($role) {
-            if ($role) {
-                $role->touch();
+	public function update(Role $role)
+	{
+		return DB::transaction(function () use ($role) {
+			if ($role) {
+				$role->touch();
 
-                return $role;
-            }
+				return $role;
+			}
 
-            return null;
-        });
-    }
+			return null;
+		});
+	}
 
-    public function remove(Role $role)
-    {
-        return DB::transaction(function () use ($role) {
-            if ($role) {
-                $this->deleteById($role->id);
+	public function remove(Role $role)
+	{
+		return DB::transaction(function () use ($role) {
+			if ($role) {
+				$this->deleteById($role->id);
 
-                return true;
-            }
+				return true;
+			}
 
-            return false;
-        });
-    }
+			return false;
+		});
+	}
 
-    public function hasUsersAssigned(Role $role)
-    {
-        return $role->users()->count();
-    }
+	public function hasUsersAssigned(Role $role)
+	{
+		return $role->users()->count();
+	}
 
-    public function hasPermissionsAssigned(Role $role)
-    {
-        return $role->permissions()->count();
-    }
+	public function hasPermissionsAssigned(Role $role)
+	{
+		return $role->permissions()->count();
+	}
 
 
-    /**
-     * @return string
-     *  Return the model
-     */
-    public function model()
-    {
-        //return YourModel::class;
-    }
+	/**
+	 * @return string
+	 *  Return the model
+	 */
+	public function model()
+	{
+		//return YourModel::class;
+	}
 }
