@@ -39,11 +39,11 @@ final class UserRepository extends BaseRepository
 		});
 	}
 
-	public function update($user)
+	public function update($user,$data = null)
 	{
-		return DB::transaction(function () use ($user) {
+		return DB::transaction(function () use ($user,$data) {
 			if ($user) {
-				$user->touch();
+				$user->touch($data);
 
 				return $user;
 			}
@@ -51,6 +51,19 @@ final class UserRepository extends BaseRepository
 			return null;
 		});
 	}
+
+    public function remove(User $user)
+    {
+        return DB::transaction(function () use ($user) {
+            if ($user) {
+                $user->delete();
+
+                return true;
+            }
+
+            return false;
+        });
+    }
 
 	public function model()
 	{

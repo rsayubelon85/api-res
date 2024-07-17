@@ -17,9 +17,9 @@ final class RoleRepository extends BaseRepository
 {
 	protected $model;
 
-	public function __construct(Role $model = null)
+	public function __construct(?Role $model = null)
 	{
-		$this->model = $model === null ? new Role() : $model;
+		$this->model = $model ?? new Role();
 	}
 
 	public function getRolTable()
@@ -82,13 +82,16 @@ final class RoleRepository extends BaseRepository
 		return $role->permissions()->count();
 	}
 
-
 	/**
 	 * @return string
 	 *  Return the model
 	 */
 	public function model()
 	{
-		//return YourModel::class;
+		return Role::class;
 	}
+
+    public function getRoleName(){
+        return $this->model->pluck('name');
+    }
 }

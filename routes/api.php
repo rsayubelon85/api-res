@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Auth\PassportAuthController;
 use App\Http\Controllers\Auth\RoleController;
-use App\Http\Controllers\Auth\UserController;
+use App\Http\Controllers\Auth\UserController\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -19,11 +19,16 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-	return $request->user();
-});
+Route::middleware(
+	'auth:sanctum'
+)->get(
+	'/user',
+	function (Request $request) {
+		return $request->user();
+	}
+);
 
-Route::controller(UserController::class)/*->middleware('auth:api')*/ ->group(function () {
+Route::controller(UserController::class)->middleware('auth:api')->group(function () {
 	Route::get('users', 'index');
 	Route::post('users', 'store');
 	Route::get('users/{user}/edit', 'edit');

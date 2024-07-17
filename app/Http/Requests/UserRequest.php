@@ -6,6 +6,8 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 final class UserRequest extends FormRequest
 {
@@ -17,6 +19,11 @@ final class UserRequest extends FormRequest
 		return true;
 	}
 
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(response()->json(['errors' => $validator->errors()], 422));
+    }
+
 	/**
 	 * Get the validation rules that apply to the request.
 	 *
@@ -24,37 +31,36 @@ final class UserRequest extends FormRequest
 	 */
 	public function rules(): array
 	{
-		$rules['name'] = 'required|string|max:50|regex:/^[\pL\s\-]+$/u';
-		$rules['last_name'] = 'required|string|max:50|regex:([a-zA-ZñÑáéíóúÁÉÍÓÚ\s]+)';
-		$rules['sex'] = 'required|string|max:1|regex:([a-zA-ZñÑáéíóúÁÉÍÓÚ\s]+)';
-		$rules['age'] = 'required|numeric|max:120';
+        $rules = [
+            'name' => 'required|string|max:50|regex:/^[\pL\s\-]+$/u',
+            'last_name' => 'required|string|max:50|regex:([a-zA-ZñÑáéíóúÁÉÍÓÚ\s]+)',
+            'sex' => 'required|string|max:1|regex:([a-zA-ZñÑáéíóúÁÉÍÓÚ\s]+)',
+            'age' => 'required|numeric|max:120',
+            'countrie_id' => 'required',
+        ];
 
-		if ($this->isMethod('POST')) {
-			$rules['email'] = 'required|string|email|max:255|unique:users,email';
-			$rules['username'] = 'required|string|regex:/^[\pL\s\-]+$/u|unique:users,username';
-			$rules['password'] = [
-				'required',
-				Password::defaults()->min(8)->letters()->mixedCase()->numbers()->symbols()->uncompromised(),
-			];
-			$rules['password_confirmation'] = 'required|same:password';
-			$rules['telephone'] = 'required|numeric|min:50000000|max:59999999|unique:users,telephone';
-		}
+        if ($this->isMethod('POST')) {
+            $rules = array_merge($rules, [
+                'email' => 'required|string|email|max:255|unique:users,email',
+                'username' => 'required|string|regex:/^[\pL\s\-]+$/u|unique:users,username',
+                'password' => [
+                    'required',
+                    Password::defaults()->min(8)->letters()->mixedCase()->numbers()->symbols()->uncompromised(),
+                ],
+                'password_confirmation' => 'required|same:password',
+            ]);
+        }
 
-		if ($this->isMethod('PUT')) {
-			$rules['telephone'] = 'required|numeric|min:50000000|max:59999999|unique:users,telephone,' . app(
-				'request'
-			)->segment(
-				2
-			);
-			if ($this->request->get('password') !== null) {
-				$rules['password'] = [
-					'required',
-					Password::defaults()->min(8)->letters()->mixedCase()->numbers()->symbols()->uncompromised(),
-				];
-				$rules['password_confirmation'] = 'required|same:password';
-			}
-		}
+        if ($this->isMethod('PUT') && !$this->filled('password')) {
+            $rules = array_merge($rules, [
+                'password' => [
+                    'required',
+                    Password::defaults()->min(8)->letters()->mixedCase()->numbers()->symbols()->uncompromised(),
+                ],
+                'password_confirmation' => 'required|same:password',
+            ]);
+        }
 
-		return $rules;
+        return $rules;
 	}
 }

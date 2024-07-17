@@ -27,7 +27,7 @@ final class User extends Authenticatable
 		'age',
 		'sex',
 		'email',
-		'nationality',
+		'countrie_id',
 		'password',
 	];
 
@@ -49,4 +49,9 @@ final class User extends Authenticatable
 	protected $casts = [
 		'email_verified_at' => 'datetime',
 	];
+
+    public function Country()
+    {
+        return $this->belongsTo('\App\Models\Countrie');
+    }
 }
